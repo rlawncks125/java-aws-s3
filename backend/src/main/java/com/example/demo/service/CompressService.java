@@ -1,12 +1,19 @@
 package com.example.demo.service;
 
+import com.example.demo.utils.CustomMultipartFile;
 import lombok.SneakyThrows;
 import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Positions;
 import org.imgscalr.Scalr;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 @Service
 public class CompressService {
@@ -54,6 +61,15 @@ public class CompressService {
                 .asBufferedImage();
     }
 
+    @SneakyThrows
+    public BufferedImage thumbnailatorWaterMark_TYPE(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        return Thumbnails.of(originalImage)
+                .size(targetWidth, targetHeight)
+                .watermark(Positions.TOP_CENTER, ImageIO.read(new File("./images/water/watermark_x300.png")), 0.5f)
+                .outputQuality(0.8)
+                .asBufferedImage();
+    }
+
     public BufferedImage Imgscalr_TYPE(BufferedImage originalImage, int targetWidth, int targetHeight) {
         return Scalr.resize(originalImage, targetWidth, targetHeight);
     }
@@ -61,5 +77,25 @@ public class CompressService {
     public BufferedImage Imgscalr_TYPE2(BufferedImage originalImage, int targetWidth, int targetHeight) {
         return Scalr.resize(originalImage, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.AUTOMATIC
                 ,targetWidth, targetHeight, Scalr.OP_ANTIALIAS);
+    }
+
+
+    public MultipartFile convertBufferedImageToMultipartFile(BufferedImage image,MultipartFile originFile) {
+
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            ImageIO.write(image, "jpeg", out);
+
+        } catch (IOException e) {
+
+            return null;
+        }
+
+        byte[] bytes = out.toByteArray();
+
+
+        return new CustomMultipartFile(bytes, originFile.getName(), originFile.getOriginalFilename(), originFile.getContentType(), bytes.length );
     }
 }

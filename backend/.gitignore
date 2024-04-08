@@ -39,3 +39,4 @@ out/
 
 ### save folder ###
 images
+!**/src/main/**/resources/application.yaml
